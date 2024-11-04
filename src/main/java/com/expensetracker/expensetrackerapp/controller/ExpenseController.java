@@ -30,7 +30,7 @@ public class ExpenseController {
         return ResponseEntity.ok(expense);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping
     public ResponseEntity<List<ExpenseDto>> getAllExpenses(){
         List<ExpenseDto> expenses = expenseService.getAllExpenses();

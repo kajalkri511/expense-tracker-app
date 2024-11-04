@@ -1,6 +1,7 @@
 package com.expensetracker.expensetrackerapp.security;
 
 import com.expensetracker.expensetrackerapp.entity.User;
+import com.expensetracker.expensetrackerapp.exception.ResourceNotFoundException;
 import com.expensetracker.expensetrackerapp.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
@@ -25,12 +26,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         Set<GrantedAuthority> authorities = user.getRoles().stream()
                 .map((role)->new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
+        System.out.println("Loaded user: " + user.getUsername());
         return new org.springframework.security.core.userdetails.User(
-                usernameOrEmail,
+                user.getUsername(),
                 user.getPassword(),
                 authorities
         );
     }
 
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
 }
 
